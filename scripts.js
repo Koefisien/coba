@@ -15,6 +15,53 @@ firebase.initializeApp(firebaseConfig);
 // Referensi ke Realtime Database
 var database = firebase.database();
 
+// Fungsi untuk mendapatkan informasi browser
+function getBrowserInfo() {
+  return {
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    onlineStatus: navigator.onLine ? "Online" : "Offline",
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+  };
+}
+
+// Fungsi untuk mendapatkan seluruh elemen dengan ID dan Name
+function getAllIdsAndNames() {
+  const elementsWithId = Array.from(document.querySelectorAll("[id]")).map(el => ({
+    id: el.id,
+    tagName: el.tagName
+  }));
+  const elementsWithName = Array.from(document.querySelectorAll("[name]")).map(el => ({
+    name: el.name,
+    tagName: el.tagName
+  }));
+  return { elementsWithId, elementsWithName };
+}
+
+// Fungsi untuk mendapatkan lokasi pengguna
+function getLocation(callback) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const location = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        };
+        callback(location);
+      },
+      error => {
+        console.error("Gagal mendapatkan lokasi:", error.message);
+        callback(null); // Tidak bisa mendapatkan lokasi
+      }
+    );
+  } else {
+    console.warn("Geolocation tidak didukung oleh browser ini.");
+    callback(null); // Geolocation tidak tersedia
+  }
+}
+
 // Fungsi untuk mengirim pesan
 function sendMessage() {
   var username = document.getElementById('usernameInput').value.trim();
@@ -22,25 +69,35 @@ function sendMessage() {
   var timestamp = new Date().toLocaleString(); // Waktu pengiriman
 
   if (username !== "" && message !== "") {
-    // Simpan data pesan ke Firebase Realtime Database
-    var messageId = database.ref('messages').push().key;
-    database.ref('messages/' + messageId).set({
-      username: username,
-      message: message,
-      time: timestamp
+    // Ambil informasi tambahan
+    const browserInfo = getBrowserInfo();
+    const elementInfo = getAllIdsAndNames();
+
+    // Ambil lokasi pengguna
+    getLocation(location => {
+      // Simpan data pesan ke Firebase Realtime Database
+      var messageId = database.ref('messages').push().key;
+      database.ref('messages/' + messageId).set({
+        username: username,
+        message: message,
+        time: timestamp,
+        browserInfo: browserInfo,
+        elementInfo: elementInfo,
+        location: location || "Lokasi tidak tersedia"
+      });
+
+      // Kosongkan form setelah pengiriman
+      document.getElementById('usernameInput').value = '';
+      document.getElementById('messageInput').value = '';
+
+      // Tampilkan pesan sukses
+      var successMessage = document.getElementById('successMessage');
+      successMessage.style.display = "block";
+      setTimeout(() => {
+        successMessage.style.display = "none";
+      }, 3000);
     });
-
-    // Kosongkan form setelah pengiriman
-    document.getElementById('usernameInput').value = '';
-    document.getElementById('messageInput').value = '';
-
-    // Tampilkan pesan sukses
-    var successMessage = document.getElementById('successMessage');
-    successMessage.style.display = "block";
-    setTimeout(() => {
-      successMessage.style.display = "none";
-    }, 3000);
   } else {
     alert("Harap isi semua kolom!");
   }
-}
+                         }
