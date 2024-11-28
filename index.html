@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NGL Anonim</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script defer src="scripts.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>Kirim Pesan Anonim</h1>
+
+  <!-- Formulir NGL -->
+  <input type="text" id="usernameInput" placeholder="Nama Pengguna Instagram" required>
+  <textarea id="messageInput" placeholder="Tulis pesan Anda di sini..." rows="5" required></textarea>
+  <button onclick="sendMessage()">Kirim Pesan</button>
+
+  <!-- Pesan sukses -->
+  <div class="success-message" id="successMessage" style="display: none;">
+    Pesan berhasil dikirim secara anonim!
+  </div>
+</div>
+</body>
+</html>
